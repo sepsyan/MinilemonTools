@@ -404,7 +404,7 @@ class clearInput(bpy.types.Operator):
         return {'FINISHED'}
 
 class VIEW3D_MT_renamer(bpy.types.Menu):
-    bl_label = 'Sepsyan Renamer'
+    bl_label = 'Sepsyan Renamer 2.0 - Git'
     
     def draw(self, context):
         layout = self.layout
