@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Sepsyan Renamer",
     "author": "Septyan Roche",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (4, 0, 0),
     "location": "ctrl + shift + R",
     "description": "multiple rename object",
@@ -404,7 +404,7 @@ class clearInput(bpy.types.Operator):
         return {'FINISHED'}
 
 class VIEW3D_MT_renamer(bpy.types.Menu):
-    bl_label = 'Sepsyan Renamer 2.0 - Git'
+    bl_label = 'Sepsyan Renamer 2.0 - Git - biar panjang aja'
     
     def draw(self, context):
         layout = self.layout
