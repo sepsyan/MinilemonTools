@@ -1,6 +1,6 @@
 bl_info = {
     "name": "MiniLemon Tools Updater",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (4, 5, 0),
     "category": "MiniLemon",
 }
@@ -88,7 +88,7 @@ class update_minilemontools_op(bpy.types.Operator):
 
     def execute(self, context):
         update = check_update()
-        self.report({'INFO'}, update)
+        # self.report({'INFO'}, update)
         return {'FINISHED'}
 
 class create_asset_op(bpy.types.Operator):
