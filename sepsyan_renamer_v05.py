@@ -19,8 +19,8 @@
 bl_info = {
     "name": "Sepsyan Renamer",
     "author": "Septyan Roche",
-    "version": (0, 5, 'alpha'),
-    "blender": (2, 80, 0),
+    "version": (1, 0, 0),
+    "blender": (4, 0, 0),
     "location": "ctrl + shift + R",
     "description": "multiple rename object",
     "category": "sepsyan"}
