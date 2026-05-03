@@ -12,6 +12,25 @@ def output_preview():
     os.makedirs(os.path.dirname(bpy.path.abspath(output_preview)), exist_ok=True)
     return output_preview
 
+def get_dimensions():
+    collection = [obj for obj in bpy.context.scene.objects if obj.hide_viewport == False]
+
+    objects = [obj for obj in collection if obj.type == 'MESH']
+
+
+    coords = []
+    for obj in objects:
+        for corner in obj.bound_box:
+            coords.append(obj.matrix_world @ mathutils.Vector(corner))
+
+    min_corner = mathutils.Vector((min([v.x for v in coords]),
+                                   min([v.y for v in coords]),
+                                   min([v.z for v in coords])))
+    max_corner = mathutils.Vector((max([v.x for v in coords]),
+                                   max([v.y for v in coords]),
+                                   max([v.z for v in coords])))
+    return min_corner, max_corner
+
 def create_objects():
     emp = "e_root"
     cam_name = 'e_cam'
@@ -31,22 +50,7 @@ def create_objects():
     cam.parent = empty
     bpy.context.scene.camera = cam
 
-    collection = [obj for obj in bpy.context.scene.objects if obj.hide_viewport == False]
-
-    objects = [obj for obj in collection if obj.type == 'MESH']
-
-
-    coords = []
-    for obj in objects:
-        for corner in obj.bound_box:
-            coords.append(obj.matrix_world @ mathutils.Vector(corner))
-
-    min_corner = mathutils.Vector((min([v.x for v in coords]),
-                                   min([v.y for v in coords]),
-                                   min([v.z for v in coords])))
-    max_corner = mathutils.Vector((max([v.x for v in coords]),
-                                   max([v.y for v in coords]),
-                                   max([v.z for v in coords])))
+    min_corner, max_corner = get_dimensions()
 
     center = (min_corner + max_corner) / 2
 
@@ -297,6 +301,9 @@ def save_collections_hierarchy():
 
     root = bpy.context.scene.collection
     data = serialize_collection(root)
+    min_corner, max_corner = get_dimensions()
+    dimension = max_corner - min_corner
+    data['dimension'] = {'x':f'{round(dimension.x,3)}cm', 'y':f'{round(dimension.y,3)}cm', 'z':f'{round(dimension.z,3)}cm'}
     data['blender version'] = ".".join(map(str, bpy.app.version))
     data['filepath'] = bpy.data.filepath
     
