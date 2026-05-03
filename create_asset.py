@@ -86,17 +86,7 @@ def load_dummy():
     col_ref = get_or_create_collection('reference')
     with bpy.data.libraries.load(dummy_path, link=False) as (data_from, data_to):
         data_to.objects = ["dummy_wayan_scale"]
-        # for obj in data_to.objects:
-        #     if isinstance(obj, str) or obj is None:
-        #         obj = bpy.data.objects.get("dummy_wayan_scale")
-
-        #     if obj and isinstance(obj, bpy.types.Object):
-                
-        #         for c in obj.users_collection:
-        #             c.objects.unlink(obj)
-
-        #         col.objects.link(obj)
-
+        
     for obj in data_to.objects:
         print(obj, type(obj))
         if obj:
@@ -105,11 +95,6 @@ def load_dummy():
     set_parent(bpy.context.scene.collection, col_ref)
     set_parent(col_ref, col)
 
-        # for obj in data_to.objects:
-        #     if obj:
-        #         if col:
-        #             col.objects.link(obj)
-                
 
 def create_assets(type, name):
     main_path = os.path.join(ASSET_PATH,type.upper(),f'{type.lower()}_{name}')
@@ -117,8 +102,9 @@ def create_assets(type, name):
     for dir in ('_Crosswalk','_Backups','_Preview','_Render','Model','Rig','Textures'):
         asset_dir = os.path.join(main_path,dir)
         os.makedirs(asset_dir, exist_ok=True)
-
+    mod_path = os.path.join(main_path, 'Model', f'{type.lower()}_{name}_mod_v01')
+    if os.path.isfile(mod_path):
+        return
+    else:
+        bpy.ops.wm.save_as_mainfile(filepath=mod_path, compress=True)
     create_asset_structure(type, name)
-
-# create_assets('AN','angsaLemon')
-# load_dummy()

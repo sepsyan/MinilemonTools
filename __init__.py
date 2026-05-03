@@ -1,6 +1,6 @@
 bl_info = {
     "name": "MiniLemon Tools Updater",
-    "version": (1, 0, 1),
+    "version": (1, 1, 1),
     "blender": (4, 5, 0),
     "category": "MiniLemon",
 }
@@ -16,7 +16,9 @@ import os
 import shutil
 from bpy.utils import register_class, unregister_class
 from . import create_asset
+from . import create_preview
 importlib.reload(create_asset)
+importlib.reload(create_preview)
 
 GITHUB_USER = "sepsyan"
 GITHUB_REPO = "MinilemonTools"
@@ -99,12 +101,16 @@ class create_asset_op(bpy.types.Operator):
         props = context.scene.mlt_props
         asset_enum = props.asset_enum
         asset_text = props.asset_text
-        create_asset.create_assets(asset_enum, asset_text)
+        main_path = os.path.join(create_asset.ASSET_PATH,asset_enum.upper(),f'{asset_enum.lower()}_{asset_text}')
+        if os.path.isdir(main_path):
+            self.report({'ERROR'}, f"Asset {asset_enum.lower()}_{asset_text} sudah ada, gunakan nama lain")
+        else:
+            create_asset.create_assets(asset_enum, asset_text)
         
         return {'FINISHED'}
 
 class clean_scene_op(bpy.types.Operator):
-    '''Bersihin semua file like new'''
+    '''Bersihin semua file bawaan blender\nKalo blendernya belum di-save.'''
     bl_idname = "asset.clean"
     bl_label = "Clear Scene"
 
@@ -121,9 +127,33 @@ class append_dummy_op(bpy.types.Operator):
     bl_label = "Append Dummy"
 
     def execute(self, context):
-        
         create_asset.load_dummy()
         return {'FINISHED'}
+
+class render_preview_op(bpy.types.Operator):
+    '''Render preview'''
+    bl_idname = "asset.render_preview"
+    bl_label = "Render Preview"
+
+    def execute(self, context):
+        if bpy.data.filepath:
+            create_preview.execute()
+        else:
+            self.report({'ERROR'}, "Blendernya di-save dulu ya")
+        return {'FINISHED'}
+
+class open_folder_preview_op(bpy.types.Operator):
+    '''Open Render preview Folder'''
+    bl_idname = "asset.render_preview_folder"
+    bl_label = "Open Folder Preview"
+
+    def execute(self, context):
+        if bpy.data.filepath:
+            create_preview.open_folder()
+        else:
+            self.report({'ERROR'}, "Blendernya di-save dulu ya")
+        return {'FINISHED'}
+
     
 class MinilemonTools_PT_panel(bpy.types.Panel):
     ver = ".".join(map(str, bl_info.get("version", (0,0,0))))
@@ -149,16 +179,30 @@ class MLT_AssetCreation_PT_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         props = context.scene.mlt_props
-        layout.operator(clean_scene_op.bl_idname, icon='FILE_REFRESH')
+        layout.operator(clean_scene_op.bl_idname, icon='TRASH')
         layout.separator()
         row = layout.row(align=True)
         row.scale_x = 0.2
         row.prop(props, 'asset_enum',text='')
         row.scale_x = 0.7
         row.prop(props, 'asset_text',text='')
-        layout.operator(create_asset_op.bl_idname, icon='FILE_REFRESH')
+        layout.operator(create_asset_op.bl_idname, icon='ASSET_MANAGER')
         layout.separator()
-        layout.operator(append_dummy_op.bl_idname, icon='FILE_REFRESH')
+        layout.operator(append_dummy_op.bl_idname, icon='OUTLINER_OB_ARMATURE')
+
+class MLT_Preview_PT_panel(bpy.types.Panel):
+    '''Panel buat bikin preview'''
+    bl_label = f"Preview"
+    bl_idname = "MLT_Preview_PT_panel"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'MLA'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator(render_preview_op.bl_idname, icon='RESTRICT_RENDER_OFF')
+        layout.operator(open_folder_preview_op.bl_idname, icon='FILE_FOLDER_LARGE')
+
 
 class MLT_Props(bpy.types.PropertyGroup):
     asset_enum: bpy.props.EnumProperty(name="Type",description="Select asset type",items=create_asset.get_asset_items)
@@ -170,8 +214,11 @@ classes = (
     create_asset_op,
     clean_scene_op,
     append_dummy_op,
+    render_preview_op,
+    open_folder_preview_op,
     MinilemonTools_PT_panel,
     MLT_AssetCreation_PT_panel,
+    MLT_Preview_PT_panel,
 )
 
 def register():
